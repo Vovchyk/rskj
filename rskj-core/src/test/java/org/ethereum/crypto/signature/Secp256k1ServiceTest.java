@@ -66,6 +66,21 @@ public abstract class Secp256k1ServiceTest {
     }
 
     @Test
+    public void test() {
+        String messageHash = "f7cf90057f86838e5efd677f4741003ab90910e4e2736ff4d7999519d162d1ed";
+        BigInteger r = new BigInteger("28824799845160661199077176548860063813328724131408018686643359460017962873020");
+        BigInteger s = new BigInteger("48456094880180616145578324187715054843822774625773874469802229460318542735739");
+        ECDSASignature signature = ECDSASignature.fromComponents(r.toByteArray(), s.toByteArray());
+        ECKey expected = ECKey.fromPrivate(new BigInteger("0"));
+        String pub = "00";
+        ECKey k = this.getSecp256k1().recoverFromSignature((byte) 0, signature, Hex.decode(messageHash), false);
+        if (k == null || !expected.equalsPub(k)) {
+            fail();
+        }
+
+    }
+
+    @Test
     public void testVerify_from_signatureToKey() {
         BigInteger r = new BigInteger("c52c114d4f5a3ba904a9b3036e5e118fe0dbb987fe3955da20f2cd8f6c21ab9c", 16);
         BigInteger s = new BigInteger("6ba4c2874299a55ad947dbc98a25ee895aabf6b625c26c435e84bfd70edf2f69", 16);
@@ -133,19 +148,12 @@ public abstract class Secp256k1ServiceTest {
 
         // Create tx and sign, then recover from serialized.
         Transaction newTx = new Transaction(2l, 2l, 2l, receiver, 2l, messageHash, (byte) 0);
-
-        logger.debug("1");
         newTx.sign(pk);
-        logger.debug("1.1");
         ImmutableTransaction recoveredTx = new ImmutableTransaction(newTx.getEncoded());
 
-        logger.debug("2");
-        // Recover Pub Key from recovered tx
         ECKey actualKey = this.getSecp256k1().signatureToKey(HashUtil.keccak256(recoveredTx.getEncodedRaw()), recoveredTx.getSignature());
-        logger.debug("3");
 
         // Recover PK and Address.
-
         String pubKeyActual = Hex.toHexString(actualKey.getPubKey());
         logger.debug("Signature public key\t: {}", pubKeyActual);
         assertEquals(pubKeyExpected, pubKeyActual);
@@ -155,6 +163,28 @@ public abstract class Secp256k1ServiceTest {
         String addressActual = Hex.toHexString(actualKey.getAddress());
         logger.debug("Sender is\t\t: {}", addressActual);
         assertEquals(addressExpected, addressActual);
+    }
+
+    @Test
+    public void testSignatureToKey_from_Tx_S31bytes() throws SignatureException {
+
+        String txString = "f8a58204940a82d2f0940c15d44f2ce6e9d753c286e9c46c2d2be1d10d2080b844a9059cbb000000000000000000000000eb656f4d4fccd2aa0f826ff314e41c6bc33ce1d100000000000000000000000000000000000000000000000000000000000f424066a0c4b11f6d42e97a6f6aadae03ee6976ab67c96d979fdfd7ed7fb9eee00cbd46379f225c029fedec7ac690b65b3f5fc77b6895b11ab29b55c7ddc736c03f2f177f";
+        ImmutableTransaction recoveredTx = new ImmutableTransaction(Hex.decode(txString));
+
+        //The aim of this test is a border case of a signature with 'S' bytes length = 31
+        assertEquals(31, recoveredTx.getSignature().getS().toByteArray().length);
+
+        // Recover Pub Key from recovered tx
+        ECKey actualKey = this.getSecp256k1().signatureToKey(HashUtil.keccak256(recoveredTx.getEncodedRaw()), recoveredTx.getSignature());
+
+        // Recover PK and Address.
+        String pubKeyActual = Hex.toHexString(actualKey.getPubKey());
+        logger.debug("Signature public key\t: {}", pubKeyActual);
+        assertEquals("04ce6188ce7d229e7d6c2d64bd8e71158d0e4064d3c5ca5fa3ee310345c04d1400a01bc89e80a996c3be0c4d95c5fe4cc64eedceaf3eab537b29300e924a9eee8b", pubKeyActual);
+
+        String addressActual = Hex.toHexString(actualKey.getAddress());
+        logger.debug("Sender is\t\t: {}", addressActual);
+        assertEquals("687e279ec75ee5dd1bdab8dbbd26c5038099f935", addressActual);
     }
 
     @Test
@@ -181,22 +211,30 @@ public abstract class Secp256k1ServiceTest {
         try {
             this.getSecp256k1().recoverFromSignature(invalidRecId, ECDSASignature.fromComponents(validBytes, validBytes), validBytes, validBoolean);
             fail();
-        }catch (IllegalArgumentException e){assertThat(e.getMessage(), containsString("recId must be positive"));}
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("recId must be positive"));
+        }
 
         try {
             this.getSecp256k1().recoverFromSignature(validRecId, new ECDSASignature(invalidBigInt, validBigInt), validBytes, validBoolean);
             fail();
-        }catch (IllegalArgumentException e){assertThat(e.getMessage(), containsString("r must be positive"));}
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("r must be positive"));
+        }
 
         try {
             this.getSecp256k1().recoverFromSignature(validRecId, new ECDSASignature(validBigInt, invalidBigInt), validBytes, validBoolean);
             fail();
-        }catch (IllegalArgumentException e){assertThat(e.getMessage(), containsString("s must be positive"));}
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("s must be positive"));
+        }
 
         try {
             this.getSecp256k1().recoverFromSignature(validRecId, new ECDSASignature(validBigInt, validBigInt), invalidNullBytes, validBoolean);
             fail();
-        }catch (IllegalArgumentException e){assertThat(e.getMessage(), containsString("messageHash must not be null"));}
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("messageHash must not be null"));
+        }
 
     }
 
