@@ -21,8 +21,6 @@ package org.ethereum.crypto.signature;
 
 import co.rsk.config.RskSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
-import org.bitcoin.NativeSecp256k1;
-import org.bitcoin.NativeSecp256k1Util;
 import org.bitcoin.Secp256k1Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
