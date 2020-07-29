@@ -886,18 +886,18 @@ public class BridgeSupport {
             }
         }
 
-        int missingSignatures = BridgeUtils.countMissingSignatures(btcContext, btcTx);
-
-        // If tx fully signed
-        if (missingSignatures == 0) {
+        if (BridgeUtils.hasEnoughSignatures(btcContext, btcTx)) {
             logger.info("Tx fully signed {}. Hex: {}", btcTx, Hex.toHexString(btcTx.bitcoinSerialize()));
             provider.getRskTxsWaitingForSignatures().remove(new Keccak256(rskTxHash));
 
             eventLogger.logReleaseBtc(btcTx, rskTxHash);
         } else {
+            int missingSignatures = BridgeUtils.countMissingSignatures(btcContext, btcTx);
             int neededSignatures = federation.getNumberOfSignaturesRequired();
             int signaturesCount = neededSignatures - missingSignatures;
-            logger.debug("Tx {} not yet fully signed. Requires {}/{} signatures but has {}", new Keccak256(rskTxHash), neededSignatures, getFederationSize(), signaturesCount);
+
+            logger.debug("Tx {} not yet fully signed. Requires {}/{} signatures but has {}",
+                    new Keccak256(rskTxHash), neededSignatures, getFederationSize(), signaturesCount);
         }
     }
 
