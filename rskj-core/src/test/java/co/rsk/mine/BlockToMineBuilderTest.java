@@ -33,7 +33,6 @@ import co.rsk.validators.BlockValidationRule;
 import org.ethereum.TestUtils;
 import org.ethereum.config.Constants;
 import org.ethereum.config.blockchain.upgrades.ActivationConfig;
-import org.ethereum.config.blockchain.upgrades.ActivationConfigsForTest;
 import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.ethereum.core.*;
 import org.ethereum.db.BlockStore;
@@ -99,7 +98,7 @@ public class BlockToMineBuilderTest {
         GasLimitConfig gasLimitConfig = new GasLimitConfig(0,0,false);
 
         when(minerUtils.getAllTransactions(any())).thenReturn(new ArrayList<>());
-        when(minerUtils.filterTransactions(any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
+        when(minerUtils.filterTransactions(any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
         when(repositoryLocator.snapshotAt(any())).thenReturn(snapshot);
         when(minimumGasPriceCalculator.calculate(any())).thenReturn(mock(Coin.class));
         when(stateRootHandler.translate(any())).thenReturn(TestUtils.randomHash());

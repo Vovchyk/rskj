@@ -61,6 +61,8 @@ public class Tx {
         RskAddress returnReceiveAddress = new RskAddress(returnReceiveAddressBytes);
 
         Mockito.when(transaction.getSender()).thenReturn(returnSender);
+        Mockito.when(transaction.getSender(any())).thenReturn(returnSender);
+        Mockito.when(transaction.getSender(any(), any())).thenReturn(returnSender);
         Mockito.when(transaction.getHash()).thenReturn(new Keccak256(TestUtils.randomBytes(32)));
         Mockito.when(transaction.acceptTransactionSignature(config.getNetworkConstants().getChainId())).thenReturn(Boolean.TRUE);
         Mockito.when(transaction.getReceiveAddress()).thenReturn(returnReceiveAddress);

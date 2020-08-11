@@ -85,7 +85,7 @@ public class MinerUtilsTest {
         Mockito.when(repository.getNonce(tx.getSender())).thenReturn(BigInteger.valueOf(0));
         Coin minGasPrice = Coin.valueOf(1L);
 
-        List<Transaction> res = new MinerUtils().filterTransactions(new LinkedList<>(), txs, accountNounces, repository, minGasPrice);
+        List<Transaction> res = new MinerUtils().filterTransactions(new LinkedList<>(), txs, accountNounces, repository, minGasPrice, null);
         Assert.assertEquals(1, res.size());
     }
 
@@ -100,7 +100,7 @@ public class MinerUtilsTest {
         Repository repository = Mockito.mock(Repository.class);
         Coin minGasPrice = Coin.valueOf(1L);
 
-        List<Transaction> res = new MinerUtils().filterTransactions(new LinkedList<>(), txs, accountNounces, repository, minGasPrice);
+        List<Transaction> res = new MinerUtils().filterTransactions(new LinkedList<>(), txs, accountNounces, repository, minGasPrice, null);
         Assert.assertEquals(1, res.size());
     }
 
@@ -115,7 +115,7 @@ public class MinerUtilsTest {
         Coin minGasPrice = Coin.valueOf(1L);
 
         List<Transaction> txsToRemove = new LinkedList<>();
-        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice);
+        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice, null);
         Assert.assertEquals(0, res.size());
         Assert.assertEquals(0, txsToRemove.size());
     }
@@ -132,7 +132,7 @@ public class MinerUtilsTest {
         Coin minGasPrice = Coin.valueOf(2L);
 
         LinkedList<Transaction> txsToRemove = new LinkedList<>();
-        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice);
+        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice, null);
         Assert.assertEquals(0, res.size());
         Assert.assertEquals(1, txsToRemove.size());
     }
@@ -150,7 +150,7 @@ public class MinerUtilsTest {
         Coin minGasPrice = Coin.valueOf(2L);
 
         LinkedList<Transaction> txsToRemove = new LinkedList<>();
-        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice);
+        List<Transaction> res = new MinerUtils().filterTransactions(txsToRemove, txs, accountNounces, repository, minGasPrice, null);
         Assert.assertEquals(0, res.size());
         Assert.assertEquals(1, txsToRemove.size());
     }

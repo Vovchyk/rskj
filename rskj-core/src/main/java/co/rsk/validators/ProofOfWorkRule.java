@@ -280,7 +280,7 @@ public class ProofOfWorkRule implements BlockHeaderValidationRule, BlockValidati
             return false;
         }
 
-        ECKey pub = Secp256k1.getInstance().recoverFromSignature(signature.getV() - 27, signature, header.getHashForMergedMining(), false);
+        ECKey pub = Secp256k1.getInstance(header.getNumber()).recoverFromSignature(signature.getV() - 27, signature, header.getHashForMergedMining(), false);
 
         return pub.getPubKeyPoint().equals(fallbackMiningPubKey.getPubKeyPoint());
     }

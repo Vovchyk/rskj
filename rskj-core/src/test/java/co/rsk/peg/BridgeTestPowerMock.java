@@ -52,7 +52,6 @@ import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.HashMapDB;
 import org.ethereum.db.MutableRepository;
 import org.ethereum.rpc.TypeConverter;
-import org.ethereum.solidity.SolidityType;
 import org.ethereum.vm.PrecompiledContracts;
 import org.ethereum.vm.VM;
 import org.ethereum.vm.program.Program;
@@ -391,7 +390,7 @@ public class BridgeTestPowerMock {
                 bridgeSupportFactory);
         Transaction mockedTx = mock(Transaction.class);
         bridge.init(mockedTx, getGenesisBlock(), createRepository().startTracking(), null, null, null);
-        Assert.assertNull(bridge.execute(new byte[4]));
+        Assert.assertNull(bridge.execute((new byte[4])));
     }
 
     @Test

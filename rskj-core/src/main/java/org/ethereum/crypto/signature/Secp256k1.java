@@ -22,6 +22,8 @@ package org.ethereum.crypto.signature;
 import co.rsk.config.RskSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.bitcoin.Secp256k1Context;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
+import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +36,15 @@ import javax.annotation.Nullable;
  */
 public final class Secp256k1 {
 
-    private static final String NATIVE_LIB = "native";
     private static final Logger logger = LoggerFactory.getLogger(Secp256k1.class);
+    private static final String NATIVE_LIB = "native";
+    private static final ConsensusRule CONSENSUS_RULE = ConsensusRule.RSKIPNATIVE;
 
-    private static Secp256k1Service instance = new Secp256k1ServiceBC();
+    private static Secp256k1Service nativeInstance = new Secp256k1ServiceNative();
+    private static Secp256k1Service bcInstance = new Secp256k1ServiceBC();
     private static boolean initialized = false;
+    private static boolean nativeActive = false;
+    private static ActivationConfig activationConfig;
 
     private Secp256k1() {
     }
@@ -61,16 +67,17 @@ public final class Secp256k1 {
         }
         if (rskSystemProperties != null) {
             String cryptoLibrary = rskSystemProperties.cryptoLibrary();
+            activationConfig = rskSystemProperties.getActivationConfig();
             logger.debug("Trying to initialize Signature Service: {}.", cryptoLibrary);
             if (NATIVE_LIB.equals(cryptoLibrary)) {
-                if(Secp256k1Context.isEnabled()){
-                    instance = new Secp256k1ServiceNative();
+                if (Secp256k1Context.isEnabled()) {
+                    nativeActive = true;
                 } else {
                     logger.debug("Signature Service {} not available, initializing Bouncy Castle.", cryptoLibrary);
-                    instance = new Secp256k1ServiceBC();
+                    nativeActive = false;
                 }
             } else {
-                instance = new Secp256k1ServiceBC();
+                nativeActive = false;
             }
         } else {
             logger.warn("Empty system properties.");
@@ -78,17 +85,35 @@ public final class Secp256k1 {
     }
 
     /**
-     * As a singleton this should be the only entry point for creating instances of SignatureService classes.
+     * As a singleton this should be the only entry point for accessing instances of SignatureService classes.
      *
      * @return either {@link Secp256k1ServiceBC} or Native Signature (future) implementation.
      */
     public static Secp256k1Service getInstance() {
-        return instance;
+        return nativeActive ? nativeInstance : bcInstance;
+    }
+
+    public static Secp256k1Service getInstance(ActivationConfig.ForBlock activations) {
+        return isNativeActivated(activations) ? nativeInstance : bcInstance;
+    }
+
+    public static Secp256k1Service getInstance(long blockNumber) {
+        ActivationConfig.ForBlock activations = getActivations(blockNumber);
+        return getInstance(activations);
+    }
+
+    private static boolean isNativeActivated(ActivationConfig.ForBlock activations) {
+        return nativeActive && activations!= null && activations.isActive(CONSENSUS_RULE);
+    }
+
+    private static ActivationConfig.ForBlock getActivations(long blockNumber) {
+        return activationConfig.forBlock(blockNumber);
     }
 
     @VisibleForTesting
     static void reset() {
-        instance = new Secp256k1ServiceBC();
+        nativeActive = false;
         initialized = false;
     }
+
 }

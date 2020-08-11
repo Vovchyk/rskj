@@ -68,7 +68,7 @@ public class BlockValidatorBuilder {
         this.blockTxsValidationRule = new BlockTxsValidationRule(new RepositoryLocator(
                 trieStore,
                 new StateRootHandler(config.getActivationConfig(), new TrieConverter(), new HashMapDB(), new HashMap<>())
-        ));
+        ), config.getActivationConfig());
         return this;
     }
 

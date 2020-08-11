@@ -391,33 +391,33 @@ public class Transaction {
     }
 
     public synchronized RskAddress getSender() {
+        return this.getSender(null);
+    }
+
+    public synchronized RskAddress getSender(ActivationConfig.ForBlock activations) {
+        return this.getSender(activations, null);
+    }
+
+    public synchronized RskAddress getSender(ActivationConfig.ForBlock activations, SignatureCache signatureCache) {
         if (sender != null) {
             return sender;
         }
-
-
         Metric metric = profiler.start(Profiler.PROFILING_TYPE.KEY_RECOV_FROM_SIG);
+
         try {
-            ECKey key = Secp256k1.getInstance().signatureToKey(getRawHash().getBytes(), getSignature());
-            sender = new RskAddress(key.getAddress());
+            if (signatureCache != null) {
+                sender = signatureCache.getSender(this, activations);
+            } else {
+                ECKey key = Secp256k1.getInstance(activations).signatureToKey(getRawHash().getBytes(), getSignature());
+                sender = new RskAddress(key.getAddress());
+            }
         } catch (SignatureException e) {
             logger.error(e.getMessage(), e);
             panicProcessor.panic("transaction", e.getMessage());
             sender = RskAddress.nullAddress();
-        }
-        finally {
+        } finally {
             profiler.stop(metric);
         }
-
-        return sender;
-    }
-
-    public synchronized RskAddress getSender(SignatureCache signatureCache) {
-        if (sender != null) {
-            return sender;
-        }
-
-        sender = signatureCache.getSender(this);
 
         return sender;
     }
@@ -567,4 +567,5 @@ public class Transaction {
                 BigInteger.ZERO.equals(new BigInteger(1, getGasLimit())) &&
                 Coin.ZERO.equals(getGasPrice());
     }
+
 }

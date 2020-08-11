@@ -22,6 +22,7 @@ package org.ethereum.core;
 import co.rsk.core.RskAddress;
 import co.rsk.remasc.RemascTransaction;
 import co.rsk.util.MaxSizeHashMap;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 
 
 public class BlockTxSignatureCache extends SignatureCache {
@@ -36,7 +37,7 @@ public class BlockTxSignatureCache extends SignatureCache {
     }
 
     @Override
-    public RskAddress getSender(Transaction transaction) {
+    public RskAddress getSender(Transaction transaction, ActivationConfig.ForBlock activations) {
 
         if (transaction instanceof RemascTransaction) {
             return RemascTransaction.REMASC_ADDRESS;
@@ -48,23 +49,23 @@ public class BlockTxSignatureCache extends SignatureCache {
         }
 
         if (internalCache.containsTx(transaction)) {
-            RskAddress sender = internalCache.getSender(transaction);
+            RskAddress sender = internalCache.getSender(transaction, activations);
             addressesCache.put(transaction, sender);
             return sender;
         }
 
-        return transaction.getSender();
+        return transaction.getSender(activations);
     }
 
     @Override
-    public void storeSender(Transaction transaction) {
+    public void storeSender(Transaction transaction, ActivationConfig.ForBlock activations) {
 
         if (!hasToComputeSender(transaction)) {
             return;
         }
 
         if (internalCache.containsTx(transaction)) {
-            RskAddress sender = internalCache.getSender(transaction);
+            RskAddress sender = internalCache.getSender(transaction, activations);
             addressesCache.put(transaction, sender);
         }
 

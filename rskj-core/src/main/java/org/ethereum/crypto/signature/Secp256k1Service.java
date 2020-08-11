@@ -33,7 +33,6 @@ import java.security.SignatureException;
  */
 public interface Secp256k1Service {
 
-
     /**
      * Given a piece of text and a message signature encoded in base64, returns an ECKey
      * containing the public key that was used to sign it. This can then be compared to the expected public key to

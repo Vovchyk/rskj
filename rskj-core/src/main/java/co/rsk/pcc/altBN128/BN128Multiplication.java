@@ -18,6 +18,7 @@
 
 package co.rsk.pcc.altBN128;
 
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 import org.ethereum.vm.GasCost;
 import org.ethereum.vm.PrecompiledContracts;
 

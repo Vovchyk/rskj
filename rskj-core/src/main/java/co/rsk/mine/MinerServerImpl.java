@@ -40,7 +40,9 @@ import org.ethereum.core.*;
 import org.ethereum.facade.Ethereum;
 import org.ethereum.listener.EthereumListenerAdapter;
 import org.ethereum.rpc.TypeConverter;
-import org.ethereum.util.*;
+import org.ethereum.util.BuildInfo;
+import org.ethereum.util.RLP;
+import org.ethereum.util.RLPList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

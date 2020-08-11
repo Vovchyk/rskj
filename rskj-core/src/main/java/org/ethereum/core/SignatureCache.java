@@ -21,19 +21,20 @@ package org.ethereum.core;
 
 import co.rsk.core.RskAddress;
 import co.rsk.remasc.RemascTransaction;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 
 import java.util.Map;
 
 public abstract class SignatureCache {
     protected Map<Transaction, RskAddress> addressesCache;
 
-    public abstract RskAddress getSender(Transaction transaction);
+    public abstract RskAddress getSender(Transaction transaction, ActivationConfig.ForBlock activations);
 
     public boolean containsTx(Transaction transaction) {
         return addressesCache.containsKey(transaction);
     }
 
-    public abstract void storeSender(Transaction tx);
+    public abstract void storeSender(Transaction tx, ActivationConfig.ForBlock activations);
 
     protected boolean hasToComputeSender(Transaction transaction) {
         if (transaction instanceof RemascTransaction) {

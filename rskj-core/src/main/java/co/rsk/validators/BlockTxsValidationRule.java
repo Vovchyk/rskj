@@ -22,6 +22,7 @@ import co.rsk.core.RskAddress;
 import co.rsk.db.RepositoryLocator;
 import co.rsk.db.RepositorySnapshot;
 import co.rsk.panic.PanicProcessor;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 import org.ethereum.core.Block;
 import org.ethereum.core.Transaction;
 import org.slf4j.Logger;
@@ -47,9 +48,11 @@ public class BlockTxsValidationRule implements BlockParentDependantValidationRul
     private static final PanicProcessor panicProcessor = new PanicProcessor();
 
     private final RepositoryLocator repositoryLocator;
+    private final ActivationConfig activationConfig;
 
-    public BlockTxsValidationRule(RepositoryLocator repositoryLocator) {
+    public BlockTxsValidationRule(RepositoryLocator repositoryLocator, ActivationConfig activationConfig) {
         this.repositoryLocator = repositoryLocator;
+        this.activationConfig = activationConfig;
     }
 
     @Override
@@ -77,7 +80,7 @@ public class BlockTxsValidationRule implements BlockParentDependantValidationRul
                 return false;
             }
 
-            RskAddress sender = tx.getSender();
+            RskAddress sender = tx.getSender(this.activationConfig.forBlock(block.getNumber()));
             BigInteger expectedNonce = curNonce.get(sender);
             if (expectedNonce == null) {
                 expectedNonce = parentRepo.getNonce(sender);

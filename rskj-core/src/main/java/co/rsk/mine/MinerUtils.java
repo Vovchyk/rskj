@@ -159,14 +159,14 @@ public class MinerUtils {
         return PendingState.sortByPriceTakingIntoAccountSenderAndNonce(txs);
     }
 
-    public List<org.ethereum.core.Transaction> filterTransactions(List<Transaction> txsToRemove, List<Transaction> txs, Map<RskAddress, BigInteger> accountNonces, RepositorySnapshot originalRepo, Coin minGasPrice) {
+    public List<org.ethereum.core.Transaction> filterTransactions(List<Transaction> txsToRemove, List<Transaction> txs, Map<RskAddress, BigInteger> accountNonces, RepositorySnapshot originalRepo, Coin minGasPrice, ActivationConfig.ForBlock activations) {
         List<org.ethereum.core.Transaction> txsResult = new ArrayList<>();
         for (org.ethereum.core.Transaction tx : txs) {
             try {
                 Keccak256 hash = tx.getHash();
                 Coin txValue = tx.getValue();
                 BigInteger txNonce = new BigInteger(1, tx.getNonce());
-                RskAddress txSender = tx.getSender();
+                RskAddress txSender = tx.getSender(activations);
                 logger.debug("Examining tx={} sender: {} value: {} nonce: {}", hash, txSender, txValue, txNonce);
 
                 BigInteger expectedNonce;

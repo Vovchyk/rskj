@@ -1254,7 +1254,7 @@ public class RskContext implements NodeBootstrapper {
             Constants commonConstants = getRskSystemProperties().getNetworkConstants();
             blockParentDependantValidationRule = new BlockParentCompositeRule(
                     new BlockTxsFieldsValidationRule(),
-                    new BlockTxsValidationRule(getRepositoryLocator()),
+                    new BlockTxsValidationRule(getRepositoryLocator(), getRskSystemProperties().getActivationConfig()),
                     new PrevMinGasPriceRule(),
                     new BlockParentNumberRule(),
                     new BlockDifficultyRule(getDifficultyCalculator()),

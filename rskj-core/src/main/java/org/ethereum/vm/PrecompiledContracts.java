@@ -127,7 +127,6 @@ public class PrecompiledContracts {
         ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
     );
 
-    private static ECRecover ecRecover = new ECRecover();
     private static Sha256 sha256 = new Sha256();
     private static Ripempd160 ripempd160 = new Ripempd160();
     private static Identity identity = new Identity();
@@ -147,7 +146,7 @@ public class PrecompiledContracts {
             return identity;
         }
         if (address.equals(ECRECOVER_ADDR_DW)) {
-            return ecRecover;
+            return new ECRecover(activations);
         }
         if (address.equals(SHA256_ADDR_DW)) {
             return sha256;
@@ -289,6 +288,12 @@ public class PrecompiledContracts {
 
     public static class ECRecover extends PrecompiledContract {
 
+        private final ActivationConfig.ForBlock activations;
+
+        public ECRecover(ActivationConfig.ForBlock activations) {
+            this.activations = activations;
+        }
+
         @Override
         public long getGasForData(byte[] data) {
             return 3000;
@@ -315,7 +320,7 @@ public class PrecompiledContracts {
                 if (isValid(r, s, v)) {
                     ECDSASignature signature = ECDSASignature.fromComponents(r, s, v[31]);
 
-                    ECKey key = Secp256k1.getInstance().signatureToKey(h, signature);
+                    ECKey key = Secp256k1.getInstance(activations).signatureToKey(h, signature);
                     out = DataWord.valueOf(key.getAddress());
                 }
             } catch (Exception any) {

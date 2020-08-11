@@ -253,7 +253,7 @@ public class TransactionPoolImpl implements TransactionPool {
         BigInteger txNonce = tx.getNonceAsInteger();
         if (txNonce.compareTo(currentNonce) > 0) {
             this.addQueuedTransaction(tx);
-            signatureCache.storeSender(tx);
+            signatureCache.storeSender(tx, null);
             return TransactionPoolAddResult.ok();
         }
 
@@ -263,7 +263,7 @@ public class TransactionPoolImpl implements TransactionPool {
         }
 
         pendingTransactions.addTransaction(tx);
-        signatureCache.storeSender(tx);
+        signatureCache.storeSender(tx, null);
         return TransactionPoolAddResult.ok();
     }
 
@@ -290,7 +290,7 @@ public class TransactionPoolImpl implements TransactionPool {
                 .filter(t -> t.getNonceAsInteger().equals(tx.getNonceAsInteger()))
                 .findFirst();
 
-        if (oldTxWithNonce.isPresent()){
+        if (oldTxWithNonce.isPresent()) {
             //oldGasPrice * (100 + priceBump) / 100
             Coin oldGasPrice = oldTxWithNonce.get().getGasPrice();
             Coin gasPriceBumped = oldGasPrice
@@ -458,12 +458,12 @@ public class TransactionPoolImpl implements TransactionPool {
         // creating fake lightweight calculated block with no hashes calculations
         return blockFactory.newBlock(
                 blockFactory.getBlockHeaderBuilder()
-                    .setParentHash(best.getHash().getBytes())
-                    .setDifficulty(best.getDifficulty())
-                    .setNumber(best.getNumber() + 1)
-                    .setGasLimit(ByteUtil.longToBytesNoLeadZeroes(Long.MAX_VALUE))
-                    .setTimestamp(best.getTimestamp() + 1)
-                    .build()
+                        .setParentHash(best.getHash().getBytes())
+                        .setDifficulty(best.getDifficulty())
+                        .setNumber(best.getNumber() + 1)
+                        .setGasLimit(ByteUtil.longToBytesNoLeadZeroes(Long.MAX_VALUE))
+                        .setTimestamp(best.getTimestamp() + 1)
+                        .build()
                 ,
                 Collections.emptyList(),
                 Collections.emptyList()
@@ -471,12 +471,12 @@ public class TransactionPoolImpl implements TransactionPool {
     }
 
     private TransactionValidationResult shouldAcceptTx(Transaction tx, RepositorySnapshot currentRepository) {
-        AccountState state = currentRepository.getAccountState(tx.getSender(signatureCache));
+        AccountState state = currentRepository.getAccountState(tx.getSender(config.getActivationConfig().forBlock(bestBlock.getNumber()), signatureCache));
         return validator.isValid(tx, bestBlock, state);
     }
 
     /**
-     * @param newTx a transaction to be added to the pending list (nonce = last pending nonce + 1)
+     * @param newTx             a transaction to be added to the pending list (nonce = last pending nonce + 1)
      * @param currentRepository
      * @return whether the sender balance is enough to pay for all pending transactions + newTx
      */
